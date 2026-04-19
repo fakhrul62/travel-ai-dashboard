@@ -1,10 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calendar, Users, DollarSign, Sparkles, Banknote, BookmarkPlus, CheckCircle2, Navigation, LocateFixed, Cloud, Briefcase, ShieldCheck, AlertCircle, Phone, PieChart, Info, ExternalLink } from 'lucide-react';
+import { MapPin, Calendar, Users, DollarSign, Sparkles, Banknote, BookmarkPlus, CheckCircle2, Navigation, LocateFixed, Cloud, Briefcase, ShieldCheck, AlertCircle, Phone, PieChart, Info, ExternalLink, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
+
+// Country to currency mapping
+const COUNTRY_CURRENCY_MAP = {
+  'Bangladesh': 'BDT', 'India': 'INR', 'United States': 'USD', 'United Kingdom': 'GBP',
+  'Japan': 'JPY', 'Australia': 'AUD', 'Canada': 'CAD', 'Germany': 'EUR', 'France': 'EUR',
+  'Italy': 'EUR', 'Spain': 'EUR', 'Netherlands': 'EUR', 'Belgium': 'EUR', 'Austria': 'EUR',
+  'Portugal': 'EUR', 'Ireland': 'EUR', 'Finland': 'EUR', 'Greece': 'EUR',
+  'China': 'CNY', 'South Korea': 'KRW', 'Thailand': 'THB', 'Malaysia': 'MYR',
+  'Singapore': 'SGD', 'Indonesia': 'IDR', 'Philippines': 'PHP', 'Vietnam': 'VND',
+  'Pakistan': 'PKR', 'Sri Lanka': 'LKR', 'Nepal': 'NPR', 'Myanmar': 'MMK',
+  'Turkey': 'TRY', 'Saudi Arabia': 'SAR', 'United Arab Emirates': 'AED', 'Qatar': 'QAR',
+  'Kuwait': 'KWD', 'Bahrain': 'BHD', 'Oman': 'OMR', 'Egypt': 'EGP',
+  'South Africa': 'ZAR', 'Nigeria': 'NGN', 'Kenya': 'KES', 'Ghana': 'GHS',
+  'Brazil': 'BRL', 'Mexico': 'MXN', 'Argentina': 'ARS', 'Colombia': 'COP', 'Chile': 'CLP',
+  'Switzerland': 'CHF', 'Sweden': 'SEK', 'Norway': 'NOK', 'Denmark': 'DKK',
+  'Poland': 'PLN', 'Czech Republic': 'CZK', 'Hungary': 'HUF', 'Romania': 'RON',
+  'Russia': 'RUB', 'Ukraine': 'UAH', 'New Zealand': 'NZD', 'Taiwan': 'TWD',
+  'Hong Kong': 'HKD', 'Israel': 'ILS', 'Jordan': 'JOD', 'Morocco': 'MAD',
+};
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -24,6 +43,13 @@ export default function DashboardPage() {
   const [userCoords, setUserCoords] = useState(null);
   const [distance, setDistance] = useState(null);
   const [locating, setLocating] = useState(false);
+
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const suggestionsRef = useRef(null);
+  const destInputRef = useRef(null);
 
   // Pre-fill destination from query param (e.g. /dashboard?destination=Kyoto,%20Japan)
   useEffect(() => {
@@ -75,6 +101,11 @@ export default function DashboardPage() {
               } else {
                 setStartLocation(data.display_name.split(',').slice(0, 2).join(', '));
               }
+
+              // Auto-detect currency from country
+              if (country && COUNTRY_CURRENCY_MAP[country]) {
+                setCurrency(COUNTRY_CURRENCY_MAP[country]);
+              }
             }
           } catch (error) {
             console.error("Reverse geocoding error:", error);
@@ -84,7 +115,6 @@ export default function DashboardPage() {
         },
         () => {
           setLocating(false);
-          // Only alert if it was a manual click, otherwise fail silently for auto-load
           console.warn("Could not get your location.");
         }
       );
@@ -93,6 +123,90 @@ export default function DashboardPage() {
       console.warn("Geolocation is not supported.");
     }
   };
+
+  // Destination autocomplete with debounce
+  const fetchSuggestions = useCallback(
+    (() => {
+      let timer = null;
+      return (query) => {
+        clearTimeout(timer);
+        if (!query || query.length < 2) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+          return;
+        }
+        timer = setTimeout(async () => {
+          try {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
+            );
+            const data = await res.json();
+            if (data && data.length > 0) {
+              setSuggestions(data.map(item => ({
+                display: item.display_name.split(',').slice(0, 3).join(',').trim(),
+                full: item.display_name,
+                lat: parseFloat(item.lat),
+                lon: parseFloat(item.lon)
+              })));
+              setShowSuggestions(true);
+              setActiveSuggestion(-1);
+            } else {
+              setSuggestions([]);
+              setShowSuggestions(false);
+            }
+          } catch (e) {
+            console.error('Autocomplete error:', e);
+          }
+        }, 400);
+      };
+    })(),
+    []
+  );
+
+  const handleDestinationChange = (e) => {
+    const val = e.target.value;
+    setDestination(val);
+    fetchSuggestions(val);
+  };
+
+  const handleSelectSuggestion = (suggestion) => {
+    setDestination(suggestion.display);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    // Calculate distance immediately
+    if (userCoords) {
+      const dist = calculateDistance(userCoords.lat, userCoords.lng, suggestion.lat, suggestion.lon);
+      setDistance(dist);
+    }
+  };
+
+  const handleDestKeyDown = (e) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestion(prev => (prev < suggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestion(prev => (prev > 0 ? prev - 1 : suggestions.length - 1));
+    } else if (e.key === 'Enter' && activeSuggestion >= 0) {
+      e.preventDefault();
+      handleSelectSuggestion(suggestions[activeSuggestion]);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+    }
+  };
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target) &&
+          destInputRef.current && !destInputRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const getDestinationCoordsAndDistance = async (query) => {
     if (!userCoords || !query) return;
@@ -119,7 +233,12 @@ export default function DashboardPage() {
     }
   }, [destination, userCoords]);
 
-  const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'INR'];
+  const currencies = [
+    'USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'INR', 'BDT', 'CNY', 'KRW',
+    'THB', 'MYR', 'SGD', 'IDR', 'PHP', 'VND', 'PKR', 'LKR', 'NPR', 'TRY',
+    'SAR', 'AED', 'QAR', 'EGP', 'ZAR', 'NGN', 'BRL', 'MXN', 'CHF', 'SEK',
+    'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'NZD', 'TWD', 'HKD', 'ILS', 'RUB'
+  ];
 
   const handleGenerate = async (e) => {
     e.preventDefault();
@@ -239,24 +358,51 @@ export default function DashboardPage() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Destination</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10" size={18} />
                   <input 
+                    ref={destInputRef}
                     type="text" 
                     required
                     value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
+                    onChange={handleDestinationChange}
+                    onKeyDown={handleDestKeyDown}
+                    onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
                     placeholder="e.g. Kyoto, Japan"
-                    className="w-full pl-10 pr-24 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none text-sm text-slate-900 dark:text-white"
+                    autoComplete="off"
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none text-sm text-slate-900 dark:text-white"
                   />
-                  <button
-                    type="button"
-                    onClick={handleGetLocation}
-                    disabled={locating}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white dark:bg-dark-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-primary-500 transition-colors"
-                    title="Use my location"
-                  >
-                    <LocateFixed size={16} className={locating ? 'animate-pulse text-primary-500' : ''} />
-                  </button>
+                  {destination.length >= 2 && (
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600 animate-pulse" size={16} />
+                  )}
+
+                  {/* Autocomplete Dropdown */}
+                  <AnimatePresence>
+                    {showSuggestions && suggestions.length > 0 && (
+                      <motion.ul
+                        ref={suggestionsRef}
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white dark:bg-dark-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto"
+                      >
+                        {suggestions.map((s, i) => (
+                          <li
+                            key={i}
+                            onClick={() => handleSelectSuggestion(s)}
+                            className={`flex items-center gap-3 px-4 py-3 cursor-pointer text-sm transition-colors border-b border-slate-100 dark:border-slate-700/50 last:border-b-0 ${
+                              i === activeSuggestion
+                                ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                            }`}
+                          >
+                            <MapPin size={14} className={`shrink-0 ${i === activeSuggestion ? 'text-primary-500' : 'text-slate-400'}`} />
+                            <span className="truncate">{s.display}</span>
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
                 </div>
                 {distance && (
                   <motion.div 

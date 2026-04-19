@@ -237,7 +237,7 @@ export default function Home() {
             <div className="lg:col-span-7" ref={textRef}>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 hero-btn">
                 <Sparkles size={16} className="text-primary-400" />
-                <span className="text-xs font-medium tracking-wide uppercase text-slate-300">Next-Gen Travel AI</span>
+                <span className="text-xs font-medium tracking-wide uppercase text-slate-500 dark:text-slate-300">Next-Gen Travel AI</span>
               </div>
               
               <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold font-outfit leading-[1.05] tracking-tight mb-8">
@@ -342,7 +342,7 @@ export default function Home() {
                 <Globe2 size={20} />
                 <span>Trending Now</span>
               </div>
-              <h2 className="text-4xl md:text-6xl font-bold font-outfit">Inspiration for your <br/>next adventure.</h2>
+              <h2 className="text-4xl md:text-6xl font-bold font-outfit">Inspiration for your <br className="hidden md:block" />next adventure.</h2>
             </div>
             <Link href={session ? "/dashboard" : "/register"} className="text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/30 pb-1 hover:border-primary-400 hover:text-primary-400 transition-colors flex items-center gap-2"
               onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
@@ -485,13 +485,13 @@ export default function Home() {
         
         <div className="max-w-4xl mx-auto relative z-10 text-center bg-white/80 dark:bg-dark-900/60 backdrop-blur-xl p-12 md:p-20 rounded-[3rem] border border-slate-200 dark:border-white/10 shadow-2xl">
           <Sparkles size={48} className="text-primary-400 mx-auto mb-8" />
-          <h2 className="text-4xl md:text-6xl font-bold font-outfit mb-6">Ready to start your journey?</h2>
-          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
+          <h2 className="text-4xl md:text-6xl font-bold font-outfit mb-6 text-slate-900 dark:text-white">Ready to start your journey?</h2>
+          <p className="text-xl text-slate-500 dark:text-slate-300 mb-10 max-w-2xl mx-auto">
             Join thousands of travelers who are discovering the world in a completely new way with AI.
           </p>
           <Link 
             href={session ? "/dashboard" : "/register"}
-            className="magnetic-btn inline-flex items-center gap-2 px-10 py-5 rounded-full bg-white text-dark-900 font-bold text-lg hover:bg-primary-50 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+            className="magnetic-btn inline-flex items-center gap-2 px-10 py-5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-dark-900 font-bold text-lg hover:bg-primary-600 dark:hover:bg-primary-50 transition-colors shadow-[0_0_30px_rgba(0,0,0,0.1)]"
             onMouseMove={handleMagneticMove}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={(e) => { handleMagneticLeave(e); setIsHovering(false); }}
