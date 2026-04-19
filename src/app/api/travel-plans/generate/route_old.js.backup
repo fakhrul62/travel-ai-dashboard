@@ -1,0 +1,128 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
+import { GoogleGenAI } from '@google/genai';
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
+
+export async function POST(req) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { destination, duration, budget, currency, travelers, startLocation } = await req.json();
+
+    if (!destination || !duration || !budget || !currency || !travelers) {
+      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+    }
+
+    console.log(`Generating plan for ${destination} starting from ${startLocation || 'unknown'}`);
+
+    const startText = startLocation ? ` starting from ${startLocation}` : '';
+    const journeyText = startLocation ? `IMPORTANT: Since the user is starting from ${startLocation}, the Day 1 itinerary MUST include specific transportation suggestions on how to get from ${startLocation} to ${destination} (e.g., flight options, train routes, or driving directions as appropriate).` : '';
+    const themeText = startLocation ? `Journey from ${startLocation}` : 'Arrival & Exploration';
+    const originText = startLocation || 'origin';
+
+    const promptText = `
+      You are an expert travel planner. Create a detailed ${duration}-day travel itinerary for ${travelers} traveler(s) to ${destination}${startText}.
+      The user has a total budget of ${budget} ${currency}.
+      
+      ${journeyText}
+
+      Return the response STRICTLY as a JSON object with the following structure, and NO markdown formatting or markdown code blocks:
+      {
+        "title": "A catchy title for the trip",
+        "summary": "A 2-3 sentence engaging summary of the trip.",
+        "estimatedCost": "The estimated total cost of the trip in ${currency} (just a number or range, e.g. '4500')",
+        "weather": "Brief overview of what to expect for weather in ${destination} during a typical visit.",
+        "packingList": ["List of 5-8 essential items to pack for this specific destination and duration"],
+        "budgetBreakdown": {
+          "accommodation": "percentage or estimate",
+          "food": "percentage or estimate",
+          "transport": "percentage or estimate",
+          "activities": "percentage or estimate"
+        },
+        "travelAgencies": [
+          {
+            "name": "Name of a real verified or reputable local/global agency for this region",
+            "type": "Local or Global",
+            "offers": ["List of 3 key things they include, e.g. Private Guide, Hotel Bookings"],
+            "notIncluded": ["List of 2 things they usually don't include, e.g. International Flights"],
+            "contact": "Website link or phone number placeholder"
+          }
+        ],
+        "itinerary": [
+          {
+            "day": 1,
+            "theme": "${themeText}",
+            "activities": [
+              { "time": "Morning", "title": "Starting the Journey", "description": "Details about travel from ${originText}." },
+              { "time": "Afternoon", "title": "Arriving at ${destination}", "description": "Details about arrival and first impressions." },
+              { "time": "Evening", "title": "Settling In", "description": "Dinner and relaxing at the destination." }
+            ]
+          }
+        ]
+      }
+    `;
+
+    // Using the exact pattern from the @google/genai SDK README
+    // and using the model the user originally had (gemini-2.5-flash)
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash', // Switching to 2.0-flash as it is more likely to be available than 2.5
+        contents: promptText,
+        config: {
+          responseMimeType: 'application/json',
+        }
+      });
+
+      if (!response || !response.text) {
+        throw new Error('Empty response from AI');
+      }
+
+      const planDetails = JSON.parse(response.text);
+
+      let coverImage = 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop';
+      
+      if (process.env.UNSPLASH_ACCESS_KEY) {
+        try {
+          const unsplashRes = await fetch(
+            `https://api.unsplash.com/search/photos?query=${encodeURIComponent(destination)}&orientation=landscape&per_page=1`,
+            {
+              headers: {
+                Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
+              },
+            }
+          );
+          const unsplashData = await unsplashRes.json();
+          if (unsplashData.results && unsplashData.results.length > 0) {
+            coverImage = unsplashData.results[0].urls.regular;
+          }
+        } catch (unsplashError) {
+          console.error('Unsplash fetch error:', unsplashError);
+        }
+      }
+
+      planDetails.coverImage = coverImage;
+      return NextResponse.json({ plan: planDetails }, { status: 200 });
+
+    } catch (aiError) {
+      console.error('AI SDK Error:', aiError);
+      return NextResponse.json(
+        { message: 'AI Generation Failed', error: aiError.message },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error('General Error:', error);
+    return NextResponse.json(
+      { message: 'Failed to generate plan', error: error.message },
+      { status: 500 }
+    );
+  }
+}
