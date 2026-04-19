@@ -26,7 +26,9 @@ export async function POST(req) {
       Create a ${duration}-day travel plan for ${travelers} people to ${destination}${startText}.
       Budget: ${budget} ${currency}.
       ${journeyText}
-      If the provided budget is not enough for a realistic trip, suggest a more realistic budget in "suggestedBudget". Otherwise, set it to the provided budget.
+      CRITICAL INSTRUCTIONS: 
+      1. You MUST construct the itinerary so that the Total Estimated Cost NEVER exceeds the provided Budget of ${budget} ${currency}. Do not suggest luxury options for low budgets.
+      2. If and ONLY if the provided budget is absolutely impossible for this destination and duration, suggest a realistic budget in "suggestedBudget" (this MUST be a different, higher number than ${budget}). Otherwise, set "suggestedBudget" to null.
       Return ONLY a JSON object:
       {
         "title": "Title",

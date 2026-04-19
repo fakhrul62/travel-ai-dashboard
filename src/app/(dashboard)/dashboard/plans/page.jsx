@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calendar, Clock, Banknote, Users, Sparkles, X, Trash2, AlertCircle, ArrowRight } from 'lucide-react';
+import { MapPin, Calendar, Clock, Banknote, Users, Sparkles, X, Trash2, AlertCircle, ArrowRight, ShieldCheck, CheckCircle2, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import ActivityAccordion from '@/components/itinerary/ActivityAccordion';
 
 export default function MyPlansPage() {
   const queryClient = useQueryClient();
@@ -127,30 +128,93 @@ export default function MyPlansPage() {
                     {selectedPlan.planDetails?.summary}
                   </p>
 
+                  {/* Suggested Budget Alert */}
+                  {selectedPlan.planDetails?.suggestedBudget && selectedPlan.planDetails.suggestedBudget.toString().replace(/[^0-9.]/g, '') !== selectedPlan.budget.toString().replace(/[^0-9.]/g, '') && (
+                    <div className="mb-10 bg-rose-50 dark:bg-rose-900/20 p-5 rounded-2xl border border-rose-100 dark:border-rose-800/50 flex items-start gap-4">
+                      <div className="p-2 bg-rose-100 dark:bg-rose-900/50 rounded-xl text-rose-600 dark:text-rose-400">
+                        <AlertCircle size={24} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-rose-900 dark:text-rose-100 mb-1">Budget Optimization Suggestion</h4>
+                        <p className="text-sm text-rose-700 dark:text-rose-300">
+                          Your provided budget of {selectedPlan.budget} {selectedPlan.currency} might be a bit tight for this {selectedPlan.duration}-day trip to {selectedPlan.destination}. 
+                          <strong className="block mt-1">Suggested Realistic Budget: {selectedPlan.planDetails.suggestedBudget}</strong>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-10">
                     {selectedPlan.planDetails?.itinerary?.map((day, index) => (
                       <div key={index} className="relative pl-8 border-l-2 border-primary-100 dark:border-slate-700">
                         <div className="absolute w-6 h-6 bg-primary-100 dark:bg-primary-900/50 rounded-full -left-[13px] top-0 flex items-center justify-center border-2 border-white dark:border-dark-800">
                           <div className="w-2.5 h-2.5 bg-primary-500 rounded-full"></div>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white font-outfit mb-5">Day {day.day}: {day.theme}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+                          <h3 className="text-xl font-bold text-slate-900 dark:text-white font-outfit">Day {day.day}: {day.theme}</h3>
+                          {day.dailyCost && (
+                            <span className="text-sm font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full w-fit">
+                              Est. {day.dailyCost}
+                            </span>
+                          )}
+                        </div>
                         
                         <div className="space-y-4">
                           {day.activities?.map((activity, actIdx) => (
-                            <div key={actIdx} className="bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
-                              <div className="flex items-center gap-3 mb-2">
-                                <span className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2.5 py-1 rounded-md">
-                                  {activity.time}
-                                </span>
-                                <h4 className="font-semibold text-slate-800 dark:text-slate-200">{activity.title}</h4>
-                              </div>
-                              <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{activity.description}</p>
-                            </div>
+                            <ActivityAccordion key={actIdx} activity={activity} />
                           ))}
                         </div>
                       </div>
                     ))}
                   </div>
+
+                  {/* Travel Agencies Section */}
+                  {selectedPlan.planDetails?.travelAgencies && selectedPlan.planDetails.travelAgencies.length > 0 && (
+                    <div className="mt-12">
+                      <div className="flex flex-col mb-6">
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white font-outfit mb-2 flex items-center gap-2">
+                          <ShieldCheck className="text-green-500" size={24} />
+                          Verified Travel Partners
+                        </h3>
+                      </div>
+                      <div className="grid gap-6">
+                        {selectedPlan.planDetails.travelAgencies.map((agency, i) => (
+                          <div key={i} className="bg-slate-50 dark:bg-dark-900/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h4 className="font-bold text-slate-900 dark:text-white text-lg font-outfit">{agency.name}</h4>
+                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-white dark:bg-dark-800 font-bold text-slate-500 uppercase tracking-wider">{agency.type}</span>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                                  <CheckCircle2 size={12} className="text-green-500" /> Included
+                                </span>
+                                <div className="flex flex-wrap gap-2">
+                                  {agency.offers?.map((offer, idx) => (
+                                    <span key={idx} className="text-[11px] font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-dark-800 px-2.5 py-1 rounded-md border border-slate-100 dark:border-slate-700">
+                                      {offer}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+                              <a 
+                                href={`https://www.google.com/search?q=${encodeURIComponent(agency.name + ' travel agency ' + selectedPlan.destination)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center justify-center gap-2 transition-all whitespace-nowrap"
+                              >
+                                <ExternalLink size={16} /> Search on Google
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
                      <button 

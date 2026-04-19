@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Calendar, Users, DollarSign, Sparkles, Banknote, BookmarkPlus, CheckCircle2, Navigation, LocateFixed, Cloud, Briefcase, ShieldCheck, AlertCircle, Phone, PieChart, Info, ExternalLink, Search } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
+import ActivityAccordion from '@/components/itinerary/ActivityAccordion';
 
 // Country to currency mapping
 const COUNTRY_CURRENCY_MAP = {
@@ -574,7 +575,7 @@ export default function DashboardPage() {
                   </p>
 
                   {/* Suggested Budget Alert */}
-                  {generatedPlan.suggestedBudget && (
+                  {generatedPlan.suggestedBudget && generatedPlan.suggestedBudget.toString().replace(/[^0-9.]/g, '') !== budget.toString().replace(/[^0-9.]/g, '') && (
                     <div className="mb-10 bg-rose-50 dark:bg-rose-900/20 p-5 rounded-2xl border border-rose-100 dark:border-rose-800/50 flex items-start gap-4">
                       <div className="p-2 bg-rose-100 dark:bg-rose-900/50 rounded-xl text-rose-600 dark:text-rose-400">
                         <AlertCircle size={24} />
@@ -658,22 +659,7 @@ export default function DashboardPage() {
                         
                         <div className="space-y-4">
                           {day.activities?.map((activity, actIdx) => (
-                            <div key={actIdx} className="bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm group">
-                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-2">
-                                <div className="flex items-center gap-3">
-                                  <span className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2.5 py-1 rounded-md whitespace-nowrap">
-                                    {activity.time}
-                                  </span>
-                                  <h4 className="font-semibold text-slate-800 dark:text-slate-200">{activity.title}</h4>
-                                </div>
-                                {activity.cost && (
-                                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-md whitespace-nowrap shrink-0 group-hover:border-primary-200 dark:group-hover:border-primary-800 transition-colors">
-                                    {activity.cost}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{activity.description}</p>
-                            </div>
+                            <ActivityAccordion key={actIdx} activity={activity} />
                           ))}
                         </div>
                       </div>
@@ -738,12 +724,14 @@ export default function DashboardPage() {
                           </div>
                           
                           <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
-                            <button className="w-full py-3.5 rounded-2xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary-500/20 whitespace-nowrap">
-                              <Phone size={16} /> Contact Specialist
-                            </button>
-                            <button className="w-full py-3.5 rounded-2xl bg-slate-100 dark:bg-dark-900 text-slate-600 dark:text-slate-300 text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all whitespace-nowrap">
-                              <ExternalLink size={16} /> Visit Website
-                            </button>
+                            <a 
+                              href={`https://www.google.com/search?q=${encodeURIComponent(agency.name + ' travel agency ' + destination)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full py-3.5 rounded-2xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary-500/20 whitespace-nowrap"
+                            >
+                              <ExternalLink size={16} /> Search on Google
+                            </a>
                           </div>
                         </div>
                       ))}
