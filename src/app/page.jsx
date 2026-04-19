@@ -519,10 +519,10 @@ export default function Home() {
           </div>
           
           <div className="flex gap-8 text-sm font-medium text-slate-700 dark:text-slate-400">
-            <Link href="#" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">About</Link>
-            <Link href="#" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Destinations</Link>
-            <Link href="#" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Terms</Link>
+            <Link href="/about" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">About</Link>
+            <Link href="/destinations" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Destinations</Link>
+            <Link href="/privacy" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Terms</Link>
           </div>
           
           <div className="text-slate-500 dark:text-slate-500 text-sm">
