@@ -1,4 +1,4 @@
-process.env.MONGODB_URI = 'mongodb://aiTravelUser:aiTravelPassword@cluster0-shard-00-00.wwkoz.mongodb.net:27017/travelPlanner?ssl=true&authSource=admin&retryWrites=true&w=majority';
+require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
