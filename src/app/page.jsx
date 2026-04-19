@@ -491,7 +491,7 @@ export default function Home() {
           </p>
           <Link 
             href={session ? "/dashboard" : "/register"}
-            className="magnetic-btn inline-flex items-center gap-2 px-10 py-5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-dark-900 font-bold text-lg hover:bg-primary-600 dark:hover:bg-primary-50 transition-colors shadow-[0_0_30px_rgba(0,0,0,0.1)]"
+            className="magnetic-btn inline-flex items-center gap-2 px-10 py-5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-dark-900 font-bold text-lg hover:bg-primary-600 dark:hover:bg-primary-50 transition-colors shadow-[0_0_30px_rgba(0,0,0,0.1)] whitespace-nowrap"
             onMouseMove={handleMagneticMove}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={(e) => { handleMagneticLeave(e); setIsHovering(false); }}
@@ -504,7 +504,7 @@ export default function Home() {
       </section>
 
       {/* 7. Footer */}
-      <footer className="py-20 px-6 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-dark-950">
+      <footer className="py-20 px-6 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-dark-950">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex flex-col items-center md:items-start">
             <Link href="/" className="text-2xl font-bold font-outfit text-slate-900 dark:text-white flex items-center gap-2 mb-4">
@@ -513,19 +513,19 @@ export default function Home() {
               </div>
               <span>WanderAI</span>
             </Link>
-            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs text-center md:text-left mb-6">
+            <p className="text-slate-600 dark:text-slate-400 text-sm max-w-xs text-center md:text-left mb-6">
               Empowering travelers with AI-driven, immersive itineraries for the most memorable journeys.
             </p>
           </div>
           
-          <div className="flex gap-8 text-sm font-medium text-slate-600 dark:text-slate-400">
-            <Link href="#" className="hover:text-primary-500 transition-colors">About</Link>
-            <Link href="#" className="hover:text-primary-500 transition-colors">Destinations</Link>
-            <Link href="#" className="hover:text-primary-500 transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-primary-500 transition-colors">Terms</Link>
+          <div className="flex gap-8 text-sm font-medium text-slate-700 dark:text-slate-400">
+            <Link href="#" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">About</Link>
+            <Link href="#" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Destinations</Link>
+            <Link href="#" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Privacy</Link>
+            <Link href="#" className="hover:text-primary-600 dark:hover:text-primary-500 transition-colors">Terms</Link>
           </div>
           
-          <div className="text-slate-400 dark:text-slate-500 text-sm">
+          <div className="text-slate-500 dark:text-slate-500 text-sm">
             © {new Date().getFullYear()} WanderAI. All rights reserved.
           </div>
         </div>

@@ -573,6 +573,22 @@ export default function DashboardPage() {
                     {generatedPlan.summary}
                   </p>
 
+                  {/* Suggested Budget Alert */}
+                  {generatedPlan.suggestedBudget && (
+                    <div className="mb-10 bg-rose-50 dark:bg-rose-900/20 p-5 rounded-2xl border border-rose-100 dark:border-rose-800/50 flex items-start gap-4">
+                      <div className="p-2 bg-rose-100 dark:bg-rose-900/50 rounded-xl text-rose-600 dark:text-rose-400">
+                        <AlertCircle size={24} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-rose-900 dark:text-rose-100 mb-1">Budget Optimization Suggestion</h4>
+                        <p className="text-sm text-rose-700 dark:text-rose-300">
+                          Your provided budget of {budget} {currency} might be a bit tight for this {duration}-day trip to {destination}. 
+                          <strong className="block mt-1">Suggested Realistic Budget: {generatedPlan.suggestedBudget}</strong>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Weather & Packing Row */}
                   <div className="grid md:grid-cols-2 gap-6 mb-10">
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/50">
@@ -631,16 +647,30 @@ export default function DashboardPage() {
                         <div className="absolute w-6 h-6 bg-primary-100 dark:bg-primary-900/50 rounded-full -left-[13px] top-0 flex items-center justify-center border-2 border-white dark:border-dark-800">
                           <div className="w-2.5 h-2.5 bg-primary-500 rounded-full"></div>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white font-outfit mb-5">Day {day.day}: {day.theme}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+                          <h3 className="text-xl font-bold text-slate-900 dark:text-white font-outfit">Day {day.day}: {day.theme}</h3>
+                          {day.dailyCost && (
+                            <span className="text-sm font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full w-fit">
+                              Est. {day.dailyCost}
+                            </span>
+                          )}
+                        </div>
                         
                         <div className="space-y-4">
                           {day.activities?.map((activity, actIdx) => (
-                            <div key={actIdx} className="bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm">
-                              <div className="flex items-center gap-3 mb-2">
-                                <span className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2.5 py-1 rounded-md">
-                                  {activity.time}
-                                </span>
-                                <h4 className="font-semibold text-slate-800 dark:text-slate-200">{activity.title}</h4>
+                            <div key={actIdx} className="bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-xl p-5 border border-slate-100 dark:border-slate-800 shadow-sm group">
+                              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-2">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2.5 py-1 rounded-md whitespace-nowrap">
+                                    {activity.time}
+                                  </span>
+                                  <h4 className="font-semibold text-slate-800 dark:text-slate-200">{activity.title}</h4>
+                                </div>
+                                {activity.cost && (
+                                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-md whitespace-nowrap shrink-0 group-hover:border-primary-200 dark:group-hover:border-primary-800 transition-colors">
+                                    {activity.cost}
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{activity.description}</p>
                             </div>
@@ -708,10 +738,10 @@ export default function DashboardPage() {
                           </div>
                           
                           <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
-                            <button className="w-full py-3.5 rounded-2xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary-500/20">
+                            <button className="w-full py-3.5 rounded-2xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary-500/20 whitespace-nowrap">
                               <Phone size={16} /> Contact Specialist
                             </button>
-                            <button className="w-full py-3.5 rounded-2xl bg-slate-100 dark:bg-dark-900 text-slate-600 dark:text-slate-300 text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all">
+                            <button className="w-full py-3.5 rounded-2xl bg-slate-100 dark:bg-dark-900 text-slate-600 dark:text-slate-300 text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all whitespace-nowrap">
                               <ExternalLink size={16} /> Visit Website
                             </button>
                           </div>
@@ -728,7 +758,7 @@ export default function DashboardPage() {
                     <button 
                       onClick={handleSavePlan}
                       disabled={saving || saved}
-                      className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 shadow-sm ${
+                      className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 shadow-sm whitespace-nowrap ${
                         saved 
                           ? 'bg-green-500 text-white shadow-green-500/20' 
                           : 'bg-dark-900 hover:bg-dark-800 dark:bg-white dark:hover:bg-slate-100 dark:text-dark-900 text-white'

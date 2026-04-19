@@ -26,16 +26,29 @@ export async function POST(req) {
       Create a ${duration}-day travel plan for ${travelers} people to ${destination}${startText}.
       Budget: ${budget} ${currency}.
       ${journeyText}
+      If the provided budget is not enough for a realistic trip, suggest a more realistic budget in "suggestedBudget". Otherwise, set it to the provided budget.
       Return ONLY a JSON object:
       {
         "title": "Title",
         "summary": "Summary",
         "estimatedCost": "4000",
+        "suggestedBudget": "Optional suggested realistic budget if the provided one is too low",
         "weather": "Info",
         "packingList": ["A", "B"],
         "budgetBreakdown": { "accommodation": "30%", "food": "20%", "transport": "25%", "activities": "25%" },
         "travelAgencies": [{ "name": "Agency", "type": "Local", "offers": ["A"], "notIncluded": ["B"], "contact": "Link" }],
-        "itinerary": [{ "day": 1, "theme": "Arrival", "activities": [{ "time": "Morning", "title": "Journey", "description": "Travel from origin" }, { "time": "Afternoon", "title": "Arrive", "description": "..." }, { "time": "Evening", "title": "Dinner", "description": "..." }] }]
+        "itinerary": [
+          { 
+            "day": 1, 
+            "theme": "Arrival", 
+            "dailyCost": "Total cost for this day in ${currency}",
+            "activities": [
+              { "time": "Morning", "title": "Journey", "description": "Travel from origin", "cost": "Estimated cost in ${currency}" },
+              { "time": "Afternoon", "title": "Arrive", "description": "...", "cost": "Estimated cost in ${currency}" },
+              { "time": "Evening", "title": "Dinner", "description": "...", "cost": "Estimated cost in ${currency}" }
+            ] 
+          }
+        ]
       }
     `;
 
