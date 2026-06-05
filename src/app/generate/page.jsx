@@ -487,7 +487,7 @@ export default function GeneratorPage() {
                   </div>
                 </motion.div>
               ) : generatedPlan ? (
-                <motion.div key="result" variants={skeletonVariants} initial="initial" animate="animate" className="bg-white dark:bg-dark-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+                <motion.div key="result" variants={skeletonVariants} initial="initial" animate="animate" className="bg-white dark:bg-dark-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden overflow-x-hidden shadow-sm">
                   <div className="relative h-72 overflow-hidden bg-slate-200 dark:bg-slate-900">
                     {generatedPlan.coverImage && (
                       <img src={generatedPlan.coverImage} alt={destination} className="w-full h-full object-cover" />
@@ -502,8 +502,8 @@ export default function GeneratorPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="p-8 space-y-10">
-                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{generatedPlan.summary}</p>
+                  <div className="p-8 space-y-10 min-w-0">
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed break-words max-w-full">{generatedPlan.summary}</p>
                     {generatedPlan.suggestedBudget && generatedPlan.suggestedBudget.toString().replace(/[^0-9.]/g, '') !== budget.toString().replace(/[^0-9.]/g, '') && (
                       <div className="rounded-3xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 p-5 text-slate-700 dark:text-rose-100">
                         <div className="flex items-start gap-3 mb-3 text-rose-700 dark:text-rose-300">
@@ -517,11 +517,11 @@ export default function GeneratorPage() {
                     )}
 
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="rounded-3xl bg-blue-50 dark:bg-blue-900/20 p-6 border border-blue-100 dark:border-blue-800/50">
+                      <div className="rounded-3xl bg-blue-50 dark:bg-blue-900/20 p-6 border border-blue-100 dark:border-blue-800/50 min-w-0">
                         <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold mb-4">
                           <Cloud size={18} /> Weather Insights
                         </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-300">{generatedPlan.weather}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300 break-words">{generatedPlan.weather}</p>
                       </div>
                       <div className="rounded-3xl bg-amber-50 dark:bg-amber-900/20 p-6 border border-amber-100 dark:border-amber-800/50">
                         <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold mb-4">
@@ -562,9 +562,9 @@ export default function GeneratorPage() {
 
                     <div className="space-y-8">
                       {generatedPlan.itinerary?.map((day, index) => (
-                        <div key={index} className="rounded-3xl border border-slate-200 dark:border-slate-700 p-6">
+                        <div key={index} className="rounded-3xl border border-slate-200 dark:border-slate-700 p-6 min-w-0">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                            <h3 className="text-xl font-bold">Day {day.day}: {day.theme}</h3>
+                            <h3 className="text-xl font-bold break-words">Day {day.day}: {day.theme}</h3>
                             {day.dailyCost && (
                               <span className="text-sm font-semibold text-primary-600 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 px-3 py-2 rounded-full">{day.dailyCost}</span>
                             )}
@@ -587,15 +587,15 @@ export default function GeneratorPage() {
                       </div>
                       <div className="grid md:grid-cols-2 gap-5">
                         {generatedPlan.travelAgencies?.map((agency, i) => (
-                          <div key={i} className="rounded-3xl border border-slate-200 dark:border-slate-700 p-5">
+                          <div key={i} className="rounded-3xl border border-slate-200 dark:border-slate-700 p-5 min-w-0">
                             <div className="flex items-start justify-between gap-4 mb-4">
                               <div>
-                                <h4 className="font-semibold text-slate-900 dark:text-white">{agency.name}</h4>
+                                <h4 className="font-semibold text-slate-900 dark:text-white break-words">{agency.name}</h4>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">{agency.type}</p>
                               </div>
                               <div className="rounded-2xl bg-primary-50 text-primary-700 px-3 py-1 text-xs font-bold">Verified</div>
                             </div>
-                            <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                            <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300 break-words">
                               <div>
                                 <div className="text-xs uppercase tracking-[0.2em] mb-2 text-slate-400">Offers</div>
                                 <div className="flex flex-wrap gap-2">
@@ -641,7 +641,7 @@ export default function GeneratorPage() {
                           <p className="text-sm mb-4">Create a free account to save, revisit and refine your itineraries anytime.</p>
                           <div className="flex flex-wrap gap-3">
                             <Link href="/register" className="rounded-full bg-primary-600 px-4 py-2 text-white text-sm">Create account</Link>
-                            <Link href="/login" className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-900">Log in</Link>
+                            <Link href="/login" className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-900 dark:text-slate-300 dark:border-slate-700">Log in</Link>
                           </div>
                         </div>
                       )}
