@@ -54,7 +54,9 @@ export async function POST(req) {
 
     const candidateModels = [
       'gemini-flash-latest',
-      'text-bison-001'
+      'gemini-pro-latest',
+      'gemini-flash-lite-latest',
+      'gemini-2.5-flash'
     ];
 
     let rawText = null;
