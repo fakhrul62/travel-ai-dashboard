@@ -8,11 +8,7 @@ export async function POST(req) {
 
     if (!apiKey) return NextResponse.json({ message: 'API Key missing' }, { status: 500 });
 
-    // Initialize the standard Google AI SDK
     const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // Explicitly use getGenerativeModel with gemini-flash-latest
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const startText = startLocation ? ` starting from ${startLocation}` : '';
     const journeyText = startLocation ? `IMPORTANT: Your Day 1 itinerary must include specific travel steps from ${startLocation} to ${destination}.` : '';
@@ -49,14 +45,39 @@ export async function POST(req) {
       }
     `;
 
-    // Call generateContent from the model instance
-    const result = await model.generateContent(promptText);
-    const response = await result.response;
-    const text = response.text();
+    const generateWithModel = async (modelName) => {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(promptText);
+      const response = await result.response;
+      return response.text();
+    };
 
-    if (!text) throw new Error('AI Error: No text returned');
+    const candidateModels = [
+      'gemini-flash-latest',
+      'text-bison-001'
+    ];
 
-    let cleanedText = text.trim();
+    let rawText = null;
+    let usedModel = null;
+
+    for (const modelName of candidateModels) {
+      try {
+        rawText = await generateWithModel(modelName);
+        usedModel = modelName;
+        break;
+      } catch (err) {
+        console.error(`AI generation failed for ${modelName}:`, err);
+        if (modelName === candidateModels[candidateModels.length - 1]) {
+          throw err;
+        }
+      }
+    }
+
+    if (!rawText) {
+      throw new Error('AI Error: no response text returned from any model');
+    }
+
+    let cleanedText = rawText.trim();
     if (cleanedText.startsWith('```')) {
       cleanedText = cleanedText.replace(/^```json\n?/, '').replace(/```$/, '').trim();
     }

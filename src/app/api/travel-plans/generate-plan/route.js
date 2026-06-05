@@ -27,27 +27,48 @@ export async function POST(req) {
       }
     `;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-    
-    const aiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: promptText }] }]
-      })
-    });
+    const requestBody = {
+      contents: [{ parts: [{ text: promptText }] }]
+    };
 
-    const aiData = await aiRes.json();
-    
-    if (!aiRes.ok) {
-      console.error('Gemini API Error:', aiData);
-      return NextResponse.json({ message: aiData.error?.message || 'AI Error' }, { status: 500 });
-    }
+    const sendRequest = async (modelName) => {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      const aiRes = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
 
-    let aiText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    aiText = aiText.trim();
-    if (aiText.startsWith('```')) {
-      aiText = aiText.replace(/^```json\n?/, '').replace(/```$/, '').trim();
+      const aiData = await aiRes.json();
+      if (!aiRes.ok) {
+        const message = aiData.error?.message || 'AI Error';
+        throw new Error(message);
+      }
+
+      let aiText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      aiText = aiText.trim();
+      if (aiText.startsWith('```')) {
+        aiText = aiText.replace(/^```json\n?/, '').replace(/```$/, '').trim();
+      }
+      return aiText;
+    };
+
+    const candidateModels = [
+      'gemini-flash-latest',
+      'text-bison-001'
+    ];
+
+    let aiText = null;
+    for (const modelName of candidateModels) {
+      try {
+        aiText = await sendRequest(modelName);
+        break;
+      } catch (err) {
+        console.error(`AI generation failed for ${modelName}:`, err);
+        if (modelName === candidateModels[candidateModels.length - 1]) {
+          throw err;
+        }
+      }
     }
 
     const planDetails = JSON.parse(aiText);

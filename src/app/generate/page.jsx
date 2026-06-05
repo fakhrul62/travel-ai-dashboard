@@ -303,7 +303,7 @@ export default function GeneratorPage() {
             </p>
           </div>
 
-          <div className="grid gap-3 text-sm text-slate-700 dark:text-slate-300">
+          <div className="flex flex-row flex-wrap items-center gap-3 text-sm text-slate-700 dark:text-slate-300 justify-end">
             {session ? (
               <Link href="/dashboard" className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-white hover:bg-slate-800 transition-colors">
                 Go to your dashboard
@@ -313,7 +313,7 @@ export default function GeneratorPage() {
                 <Link href="/register" className="inline-flex items-center justify-center rounded-full bg-primary-600 px-5 py-3 text-white hover:bg-primary-500 transition-colors">
                   Create free account
                 </Link>
-                <Link href="/login" className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 transition-colors">
+                <Link href="/login" className="inline-flex items-center justify-center rounded-full px-5 py-3 border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 transition-colors">
                   Already have an account?
                 </Link>
               </>
