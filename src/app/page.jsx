@@ -210,7 +210,7 @@ export default function Home() {
                   Log in
                 </Link>
                 <Link 
-                  href="/register"
+                  href="/generate"
                   className="px-6 py-2.5 rounded-full bg-primary-600 hover:bg-primary-500 text-white font-medium transition-all shadow-lg shadow-primary-500/20 hover:shadow-primary-500/40 text-sm"
                   onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}
                 >
@@ -255,7 +255,7 @@ export default function Home() {
               
               <div className="flex flex-col sm:flex-row gap-5">
                 <Link 
-                  href={session ? "/dashboard" : "/register"}
+                  href={session ? "/dashboard" : "/generate"}
                   className="hero-btn magnetic-btn px-8 py-4 rounded-full bg-primary-600 text-white font-semibold hover:bg-primary-500 flex items-center justify-center gap-2 group text-base shadow-lg shadow-primary-500/20"
                   onMouseMove={handleMagneticMove}
                   onMouseEnter={() => setIsHovering(true)}
@@ -344,7 +344,7 @@ export default function Home() {
               </div>
               <h2 className="text-4xl md:text-6xl font-bold font-outfit">Inspiration for your <br className="hidden md:block" />next adventure.</h2>
             </div>
-            <Link href={session ? "/dashboard" : "/register"} className="text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/30 pb-1 hover:border-primary-400 hover:text-primary-400 transition-colors flex items-center gap-2"
+              <Link href={session ? "/dashboard" : "/generate"} className="text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/30 pb-1 hover:border-primary-400 hover:text-primary-400 transition-colors flex items-center gap-2"
               onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
               View all destinations <ArrowRight size={16} />
             </Link>
@@ -359,7 +359,7 @@ export default function Home() {
             ].map((dest, i) => (
               <Link 
                 key={i} 
-                href={session ? `/dashboard?destination=${encodeURIComponent(dest.title)}` : '/register'}
+                href={session ? `/dashboard?destination=${encodeURIComponent(dest.title)}` : '/generate'}
                 className={`dest-card relative h-[400px] rounded-3xl overflow-hidden group cursor-pointer ${dest.span} block`}
                 onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}
               >
