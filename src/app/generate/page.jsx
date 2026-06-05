@@ -322,7 +322,7 @@ export default function GeneratorPage() {
         </div>
 
         <div className="grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 min-w-0">
             <div className="bg-slate-50 dark:bg-dark-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
               <h2 className="text-xl font-bold mb-6">Create your itinerary</h2>
               <form onSubmit={handleGenerate} className="space-y-5">
@@ -475,7 +475,7 @@ export default function GeneratorPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8 min-w-0">
             <AnimatePresence mode="wait">
               {loading ? (
                 <motion.div key="loading" variants={skeletonVariants} initial="initial" animate="animate" exit="exit" className="bg-slate-50 dark:bg-dark-800 rounded-3xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
@@ -493,8 +493,8 @@ export default function GeneratorPage() {
                       <img src={generatedPlan.coverImage} alt={destination} className="w-full h-full object-cover" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-dark-900/95 via-dark-900/40 to-transparent" />
-                    <div className="absolute bottom-6 left-6 right-6">
-                      <h2 className="text-3xl font-bold text-white">{generatedPlan.title}</h2>
+                    <div className="absolute bottom-6 left-6 right-6 min-w-0">
+                      <h2 className="text-3xl font-bold text-white break-words max-w-full">{generatedPlan.title}</h2>
                       <div className="mt-3 flex flex-wrap gap-3 text-white/80 text-sm">
                         <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2">{duration} Days</span>
                         <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2">Est. {generatedPlan.estimatedCost} {currency}</span>
